@@ -24,4 +24,15 @@
     <string name="auth_session_cleared">Sesión local eliminada.</string>
     <string name="auth_token_saved">guardado</string>
     <string name="auth_token_missing">falta (solo registro)</string>
+    <string name="open_booking_screen">Reservar cita</string>
+    <string name="booking_title">Disponibilidad y reserva</string>
+    <string name="booking_load_slots">Ver horarios disponibles</string>
+    <string name="booking_confirm">Confirmar cita</string>
+    <string name="booking_login_required">Inicia sesión primero (Registro / inicio de sesión).</string>
+    <string name="booking_patient_ready">Paciente: %1$s\nID: %2$s</string>
+    <string name="booking_slots_loaded">%1$d horario(s) en %2$s.</string>
+    <string name="booking_select_slot">Selecciona un horario de la lista.</string>
+    <string name="booking_slot_item">%1$s – %2$s (%3$s)</string>
+    <string name="booking_confirmed">Cita confirmada\nID: %1$s\nEstado: %2$s</string>
+    <string name="booking_error">Error: %1$s</string>
 </resources>

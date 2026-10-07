@@ -6,47 +6,51 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/titleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/optical_stores_title"
+        android:text="@string/booking_title"
         android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:paddingBottom="12dp" />
 
-    <Button
-        android:id="@+id/openAuthButton"
+    <Spinner
+        android:id="@+id/storeSpinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/open_auth_screen" />
+        android:layout_height="wrap_content" />
 
     <Button
-        android:id="@+id/openBookingButton"
+        android:id="@+id/loadSlotsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/open_booking_screen" />
+        android:layout_marginTop="8dp"
+        android:text="@string/booking_load_slots" />
+
+    <ListView
+        android:id="@+id/slotList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:choiceMode="singleChoice" />
+
+    <Button
+        android:id="@+id/bookButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/booking_confirm" />
 
     <ProgressBar
-        android:id="@+id/loadingIndicator"
+        android:id="@+id/bookingLoadingIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:visibility="gone" />
 
     <TextView
-        android:id="@+id/statusText"
+        android:id="@+id/bookingStatusText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
+        android:layout_marginTop="12dp"
         android:textAppearance="@android:style/TextAppearance.Material.Body1" />
-
-    <ListView
-        android:id="@+id/storeList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp" />
 
 </LinearLayout>

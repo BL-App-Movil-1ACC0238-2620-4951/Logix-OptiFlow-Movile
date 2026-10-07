@@ -27,6 +27,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.openAuthButton).setOnClickListener {
             startActivity(Intent(this, AuthActivity::class.java))
         }
+        findViewById<Button>(R.id.openBookingButton).setOnClickListener {
+            startActivity(Intent(this, BookingActivity::class.java))
+        }
 
         val loadingIndicator = findViewById<ProgressBar>(R.id.loadingIndicator)
         val statusText = findViewById<TextView>(R.id.statusText)

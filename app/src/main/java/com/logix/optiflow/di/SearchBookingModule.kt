@@ -3,12 +3,16 @@ package com.logix.optiflow.di
 import android.content.Context
 import com.logix.optiflow.data.local.PatientSessionStore
 import com.logix.optiflow.data.remote.ApiClient
+import com.logix.optiflow.data.repository.AppointmentRepositoryImpl
 import com.logix.optiflow.data.repository.OpticalStoreRepositoryImpl
 import com.logix.optiflow.data.repository.PatientRepositoryImpl
+import com.logix.optiflow.domain.repository.AppointmentRepository
 import com.logix.optiflow.domain.repository.OpticalStoreRepository
 import com.logix.optiflow.domain.repository.PatientRepository
+import com.logix.optiflow.domain.usecase.BookAppointmentUseCase
 import com.logix.optiflow.domain.usecase.GetOpticalStoresUseCase
 import com.logix.optiflow.domain.usecase.GetPatientSessionUseCase
+import com.logix.optiflow.domain.usecase.GetStoreAvailabilityUseCase
 import com.logix.optiflow.domain.usecase.LoginPatientUseCase
 import com.logix.optiflow.domain.usecase.RegisterPatientUseCase
 
@@ -58,5 +62,20 @@ object SearchBookingModule {
 
     val getPatientSessionUseCase: GetPatientSessionUseCase by lazy {
         GetPatientSessionUseCase(patientRepository)
+    }
+
+    val appointmentRepository: AppointmentRepository by lazy {
+        AppointmentRepositoryImpl(
+            api = ApiClient.searchBookingApi,
+            sessionStore = patientSessionStore,
+        )
+    }
+
+    val getStoreAvailabilityUseCase: GetStoreAvailabilityUseCase by lazy {
+        GetStoreAvailabilityUseCase(appointmentRepository)
+    }
+
+    val bookAppointmentUseCase: BookAppointmentUseCase by lazy {
+        BookAppointmentUseCase(appointmentRepository)
     }
 }
