@@ -1,0 +1,9 @@
+# Copia estas claves a local.properties (no se sube a git).
+# sdk.dir lo genera Android Studio al sincronizar.
+# sdk.dir=C:/Users/User/AppData/Local/Android/Sdk
+#
+# Override opcional de la URL. Si no está, se usan los defaults del flavor:
+#   local -> http://10.0.2.2:8080/
+#   prod  -> https://logix-optiflow-back-end.onrender.com/
+# api.base.url.local=http://10.0.2.2:8080/
+# api.base.url.prod=https://logix-optiflow-back-end.onrender.com/

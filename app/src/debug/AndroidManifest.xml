@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- HTTP del emulador (10.0.2.2) solo en debug. prodRelease sigue en HTTPS. -->
+    <application android:usesCleartextTraffic="true" />
+
+</manifest>
