@@ -3,6 +3,8 @@ package com.logix.optiflow.ui.search
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,6 +33,7 @@ import com.logix.optiflow.ui.ViewModelFactories
 import com.logix.optiflow.ui.components.OptiFlowScaffold
 import java.util.UUID
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StoreSearchScreen(
     onOpenAuth: () -> Unit,
@@ -61,6 +65,29 @@ fun StoreSearchScreen(
                 label = { Text(stringResource(R.string.flow_search_address)) },
                 singleLine = true,
             )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = uiState.minRatingQuery,
+                onValueChange = viewModel::onMinRatingChange,
+                label = { Text(stringResource(R.string.flow_search_min_rating)) },
+                placeholder = { Text(stringResource(R.string.flow_search_min_rating_hint)) },
+                singleLine = true,
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FilterChip(
+                    selected = uiState.minRatingQuery == "4.0",
+                    onClick = { viewModel.setMinRatingPreset(4.0) },
+                    label = { Text(stringResource(R.string.flow_filter_rating_40)) },
+                )
+                FilterChip(
+                    selected = uiState.minRatingQuery == "4.5",
+                    onClick = { viewModel.setMinRatingPreset(4.5) },
+                    label = { Text(stringResource(R.string.flow_filter_rating_45)) },
+                )
+            }
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = viewModel::search,
@@ -77,7 +104,7 @@ fun StoreSearchScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
             } else if (uiState.stores.isEmpty() && uiState.errorMessage == null) {
-                Text(stringResource(R.string.flow_search_empty))
+                Text(uiState.infoMessage ?: stringResource(R.string.flow_search_empty))
             } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f),

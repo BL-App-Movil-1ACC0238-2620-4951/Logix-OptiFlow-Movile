@@ -49,4 +49,8 @@
     <string name="flow_confirmation_title">Cita confirmada</string>
     <string name="flow_confirmation_body">Tu reserva quedó registrada en OptiFlow.</string>
     <string name="flow_back_home">Volver al inicio</string>
+    <string name="flow_search_min_rating">Rating mínimo</string>
+    <string name="flow_search_min_rating_hint">Ej. 4.0 (usa /optical-stores/search)</string>
+    <string name="flow_filter_rating_40">★ 4.0+</string>
+    <string name="flow_filter_rating_45">★ 4.5+</string>
 </resources>

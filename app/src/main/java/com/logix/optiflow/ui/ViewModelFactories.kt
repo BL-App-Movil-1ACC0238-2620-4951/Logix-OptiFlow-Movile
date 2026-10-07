@@ -12,7 +12,10 @@ object ViewModelFactories {
 
     val storeSearch: ViewModelProvider.Factory =
         simpleFactory {
-            StoreSearchViewModel(SearchBookingModule.getOpticalStoresUseCase)
+            StoreSearchViewModel(
+                getOpticalStores = SearchBookingModule.getOpticalStoresUseCase,
+                searchOpticalStores = SearchBookingModule.searchOpticalStoresUseCase,
+            )
         }
 
     val auth: ViewModelProvider.Factory =
