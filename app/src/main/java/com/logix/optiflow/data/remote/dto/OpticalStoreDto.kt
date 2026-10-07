@@ -1,0 +1,18 @@
+package com.logix.optiflow.data.remote.dto
+
+import java.math.BigDecimal
+import java.util.UUID
+
+data class OpticalStoreDto(
+    val id: UUID,
+    val name: String,
+    val address: String,
+    val phone: String,
+    val rating: BigDecimal?,
+    val status: String,
+)
+
+data class OpticalStoreListResponse(
+    val message: String?,
+    val opticalStores: List<OpticalStoreDto>?,
+)

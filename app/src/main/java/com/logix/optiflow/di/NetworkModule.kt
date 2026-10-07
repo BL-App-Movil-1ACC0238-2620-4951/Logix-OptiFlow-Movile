@@ -1,6 +1,8 @@
 package com.logix.optiflow.di
 
 import com.logix.optiflow.BuildConfig
+import com.logix.optiflow.data.remote.json.InstantJsonAdapter
+import com.logix.optiflow.data.remote.json.UuidJsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.util.concurrent.TimeUnit
@@ -15,6 +17,8 @@ object NetworkModule {
 
     fun moshi(): Moshi =
         Moshi.Builder()
+            .add(UuidJsonAdapter())
+            .add(InstantJsonAdapter())
             .add(KotlinJsonAdapterFactory())
             .build()
 
