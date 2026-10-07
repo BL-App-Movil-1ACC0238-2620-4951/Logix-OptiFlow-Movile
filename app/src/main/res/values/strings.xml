@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Logix OptiFlow</string>
+    <string name="optical_stores_title">Ópticas disponibles</string>
+    <string name="optical_stores_loading">Cargando tiendas desde el servidor…</string>
+    <string name="optical_stores_empty">No hay ópticas disponibles.</string>
+    <string name="optical_stores_error">No se pudieron cargar las tiendas: %1$s</string>
+    <string name="optical_stores_loaded">%1$d tienda(s) desde Render.</string>
+    <string name="optical_store_rating">Rating: %1$.1f</string>
+    <string name="optical_store_phone">Tel: %1$s</string>
 </resources>
