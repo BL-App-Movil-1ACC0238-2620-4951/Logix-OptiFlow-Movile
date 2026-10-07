@@ -1,7 +1,9 @@
 package com.logix.optiflow
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ListView
@@ -19,7 +21,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        SearchBookingModule.init(applicationContext)
         setContentView(R.layout.activity_main)
+
+        findViewById<Button>(R.id.openAuthButton).setOnClickListener {
+            startActivity(Intent(this, AuthActivity::class.java))
+        }
 
         val loadingIndicator = findViewById<ProgressBar>(R.id.loadingIndicator)
         val statusText = findViewById<TextView>(R.id.statusText)

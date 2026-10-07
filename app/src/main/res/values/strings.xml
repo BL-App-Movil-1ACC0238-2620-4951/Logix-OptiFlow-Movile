@@ -8,4 +8,20 @@
     <string name="optical_stores_loaded">%1$d tienda(s) desde Render.</string>
     <string name="optical_store_rating">Rating: %1$.1f</string>
     <string name="optical_store_phone">Tel: %1$s</string>
+    <string name="open_auth_screen">Registro / inicio de sesión</string>
+    <string name="auth_title">Paciente</string>
+    <string name="auth_name_hint">Nombre completo</string>
+    <string name="auth_email_hint">Correo electrónico</string>
+    <string name="auth_phone_hint">Teléfono</string>
+    <string name="auth_password_hint">Contraseña (mín. 8 caracteres)</string>
+    <string name="auth_register">Registrar</string>
+    <string name="auth_login">Iniciar sesión</string>
+    <string name="auth_clear_session">Borrar sesión local</string>
+    <string name="auth_register_success">Registro OK: %1$s\nID: %2$s\n(Inicia sesión para guardar el token.)</string>
+    <string name="auth_error">Error: %1$s</string>
+    <string name="auth_no_session">Sin sesión guardada en DataStore.</string>
+    <string name="auth_session_saved">Sesión: %1$s\nID: %2$s\nToken: %3$s</string>
+    <string name="auth_session_cleared">Sesión local eliminada.</string>
+    <string name="auth_token_saved">guardado</string>
+    <string name="auth_token_missing">falta (solo registro)</string>
 </resources>
