@@ -35,4 +35,18 @@
     <string name="booking_slot_item">%1$s – %2$s (%3$s)</string>
     <string name="booking_confirmed">Cita confirmada\nID: %1$s\nEstado: %2$s</string>
     <string name="booking_error">Error: %1$s</string>
+    <string name="flow_search_title">Buscar ópticas</string>
+    <string name="flow_search_subtitle">Encuentra sucursales y revisa horarios (US05).</string>
+    <string name="flow_search_name">Nombre de la óptica</string>
+    <string name="flow_search_address">Dirección o distrito</string>
+    <string name="flow_search_button">Buscar</string>
+    <string name="flow_search_empty">No hay resultados. Prueba otro filtro o deja los campos vacíos.</string>
+    <string name="flow_open_auth">Mi cuenta / iniciar sesión</string>
+    <string name="flow_auth_title">Acceso paciente</string>
+    <string name="flow_auth_session">Sesión: %1$s\nID: %2$s</string>
+    <string name="flow_auth_continue">Continuar</string>
+    <string name="flow_auth_logout">Cerrar sesión</string>
+    <string name="flow_confirmation_title">Cita confirmada</string>
+    <string name="flow_confirmation_body">Tu reserva quedó registrada en OptiFlow.</string>
+    <string name="flow_back_home">Volver al inicio</string>
 </resources>
