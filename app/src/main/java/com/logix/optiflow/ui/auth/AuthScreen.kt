@@ -3,35 +3,22 @@ package com.logix.optiflow.ui.auth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,376 +26,395 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.logix.optiflow.R
 import com.logix.optiflow.ui.ViewModelFactories
-import com.logix.optiflow.ui.theme.OptiFlowChipBackground
-import com.logix.optiflow.ui.theme.OptiFlowFieldBorder
-import com.logix.optiflow.ui.theme.OptiFlowGradientBottom
-import com.logix.optiflow.ui.theme.OptiFlowGradientTop
-import com.logix.optiflow.ui.theme.OptiFlowMuted
-import com.logix.optiflow.ui.theme.OptiFlowNavy
+import com.logix.optiflow.ui.components.ErrorBanner
+import com.logix.optiflow.ui.components.HSpace
+import com.logix.optiflow.ui.components.LIcon
+import com.logix.optiflow.ui.components.SolidButton
+import com.logix.optiflow.ui.components.Txt
+import com.logix.optiflow.ui.components.VSpace
+import com.logix.optiflow.ui.components.tap
+import com.logix.optiflow.ui.theme.Brand
+import com.logix.optiflow.ui.theme.CardSurface
+import com.logix.optiflow.ui.theme.DeepNavy
+import com.logix.optiflow.ui.theme.Electric
+import com.logix.optiflow.ui.theme.Jakarta
+import com.logix.optiflow.ui.theme.Lavender
+import com.logix.optiflow.ui.theme.LoginGradientTop
+import com.logix.optiflow.ui.theme.MintWhite
+import com.logix.optiflow.ui.theme.NavyBlue
+import com.logix.optiflow.ui.theme.OpenSansCondensed
+import com.logix.optiflow.ui.theme.Periwinkle
+import com.logix.optiflow.ui.theme.Poppins
+import com.logix.optiflow.ui.theme.SkyTint
+import com.logix.optiflow.ui.theme.Slate200
+import com.logix.optiflow.ui.theme.Slate400
+import com.logix.optiflow.ui.theme.Slate500
+import com.logix.optiflow.ui.theme.Slate700
+import com.logix.optiflow.ui.theme.Subtitle
+import com.logix.optiflow.ui.theme.Tagline
+import com.logix.optiflow.ui.theme.White
+
+private val CtaNavy = Color(0xFF1C3C78)
 
 @Composable
-fun AuthScreen(
-    onAuthenticated: () -> Unit,
-    onBack: (() -> Unit)? = null,
-    viewModel: AuthViewModel = viewModel(factory = ViewModelFactories.auth),
-) {
-    val uiState by viewModel.uiState.collectAsState()
+fun AuthScreen(onAuthenticated: (UserRole) -> Unit) {
+    val viewModel: AuthViewModel = viewModel(factory = ViewModelFactories.auth)
+    val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState.loginSucceeded) {
-        if (uiState.loginSucceeded) {
-            onAuthenticated()
+    LaunchedEffect(state.authenticatedAs) {
+        state.authenticatedAs?.let {
+            viewModel.consumeAuthenticated()
+            onAuthenticated(it)
         }
     }
 
+    com.logix.optiflow.ui.components.StatusBarIcons(lightIcons = false)
     Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(OptiFlowGradientTop, OptiFlowGradientBottom),
-                    ),
-                ),
+        Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(0f to LoginGradientTop, 0.8125f to White)),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = 24.dp),
+            Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (onBack != null) {
-                Text(
-                    text = "← Volver",
-                    modifier = Modifier.fillMaxWidth().clickable(onClick = onBack),
-                    color = OptiFlowNavy,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
+            VSpace(27.dp)
             Image(
-                painter = painterResource(R.drawable.optiflow_logo),
-                contentDescription = stringResource(R.string.welcome_brand_name),
-                contentScale = ContentScale.Fit,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(168.dp)
-                        .padding(horizontal = 56.dp),
+                painter = painterResource(R.drawable.img_logo),
+                contentDescription = "OptiFlow",
+                modifier = Modifier.size(width = 137.dp, height = 108.dp),
             )
-            Text(
-                text = stringResource(R.string.welcome_brand_name),
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                color = OptiFlowNavy,
-            )
-            Text(
-                text = stringResource(R.string.welcome_tagline),
-                color = OptiFlowMuted,
-                fontSize = 16.sp,
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.welcome_card_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = OptiFlowNavy,
-                    )
-                    Text(
-                        text = stringResource(R.string.welcome_card_subtitle),
-                        color = OptiFlowMuted,
-                        fontSize = 13.sp,
-                    )
-
-                    if (uiState.session?.token?.isNotBlank() == true) {
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = viewModel::continueWithSavedSession,
-                            shape = RoundedCornerShape(14.dp),
-                            colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = OptiFlowNavy,
-                                    contentColor = Color.White,
-                                ),
-                        ) {
-                            Text(stringResource(R.string.welcome_continue_session))
-                        }
-                    }
-
-                    AuthModeToggle(
-                        isRegister = uiState.isRegisterMode,
-                        onLogin = { viewModel.setRegisterMode(false) },
-                        onRegister = { viewModel.setRegisterMode(true) },
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        RoleCard(
-                            modifier = Modifier.weight(1f),
-                            title = stringResource(R.string.welcome_role_patient),
-                            subtitle = stringResource(R.string.welcome_role_patient_desc),
-                            initial = "P",
-                            selected = uiState.role == UserRole.PATIENT,
-                            onClick = { viewModel.setRole(UserRole.PATIENT) },
-                        )
-                        RoleCard(
-                            modifier = Modifier.weight(1f),
-                            title = stringResource(R.string.welcome_role_clinical),
-                            subtitle = stringResource(R.string.welcome_role_clinical_desc),
-                            initial = "C",
-                            selected = uiState.role == UserRole.CLINICAL,
-                            onClick = { viewModel.setRole(UserRole.CLINICAL) },
-                        )
-                    }
-
-                    if (uiState.isRegisterMode) {
-                        AuthField(
-                            label = stringResource(R.string.auth_name_hint),
-                            value = uiState.name,
-                            onValueChange = viewModel::onNameChange,
-                        )
-                        AuthField(
-                            label = stringResource(R.string.auth_phone_hint),
-                            value = uiState.phone,
-                            onValueChange = viewModel::onPhoneChange,
-                        )
-                    }
-
-                    AuthField(
-                        label = stringResource(R.string.auth_email_hint),
-                        value = uiState.email,
-                        onValueChange = viewModel::onEmailChange,
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = stringResource(R.string.auth_password_hint),
-                            fontWeight = FontWeight.SemiBold,
-                            color = OptiFlowNavy,
-                        )
-                        if (!uiState.isRegisterMode) {
-                            Text(
-                                text = stringResource(R.string.welcome_forgot_password),
-                                color = OptiFlowMuted,
-                                fontSize = 12.sp,
-                            )
-                        }
-                    }
-
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = uiState.password,
-                        onValueChange = viewModel::onPasswordChange,
-                        placeholder = { Text(stringResource(R.string.welcome_password_placeholder)) },
-                        visualTransformation =
-                            if (uiState.passwordVisible) {
-                                VisualTransformation.None
-                            } else {
-                                PasswordVisualTransformation()
-                            },
-                        trailingIcon = {
-                            IconButton(onClick = viewModel::togglePasswordVisibility) {
-                                Icon(
-                                    imageVector =
-                                        if (uiState.passwordVisible) {
-                                            Icons.Filled.VisibilityOff
-                                        } else {
-                                            Icons.Filled.Visibility
-                                        },
-                                    contentDescription = null,
-                                )
-                            }
-                        },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = fieldColors(),
-                        singleLine = true,
-                    )
-
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                    }
-
-                    Button(
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        onClick = viewModel::submit,
-                        enabled = !uiState.isLoading,
-                        shape = RoundedCornerShape(14.dp),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = OptiFlowNavy,
-                                contentColor = Color.White,
-                            ),
-                    ) {
-                        Text(
-                            text =
-                                if (uiState.isRegisterMode) {
-                                    stringResource(R.string.welcome_register_cta)
-                                } else {
-                                    stringResource(R.string.welcome_login_cta)
-                                },
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
-                    }
-
-                    uiState.errorMessage?.let { message ->
-                        Text(text = message, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
-                    }
-                    uiState.successMessage?.let { message ->
-                        Text(text = message, color = OptiFlowNavy, textAlign = TextAlign.Center)
-                    }
-                }
-            }
+            Txt("OptiFlow", 32, weight = FontWeight.Bold, color = Brand, family = Poppins)
+            VSpace(2.dp)
+            Txt("Tu óptica, siempre cerca", 16, color = Tagline, family = OpenSansCondensed)
+            VSpace(30.dp)
+            AuthCard(state, viewModel)
         }
     }
 }
 
 @Composable
-private fun AuthModeToggle(
-    isRegister: Boolean,
-    onLogin: () -> Unit,
-    onRegister: () -> Unit,
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(OptiFlowChipBackground)
-                .padding(4.dp),
+private fun AuthCard(state: AuthUiState, viewModel: AuthViewModel) {
+    Column(
+        Modifier
+            .padding(horizontal = 26.dp)
+            .fillMaxWidth()
+            .shadow(
+                elevation = 18.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = Color(0x991D3B77),
+                spotColor = Color(0x991D3B77),
+            ).clip(RoundedCornerShape(20.dp))
+            .background(CardSurface)
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ToggleChip(
-            modifier = Modifier.weight(1f),
-            text = stringResource(R.string.welcome_tab_login),
-            selected = !isRegister,
-            onClick = onLogin,
+        Txt(
+            "Accede a OptiFlow",
+            26,
+            weight = FontWeight.Bold,
+            color = DeepNavy,
+            family = Poppins,
+            letterSpacing = (-0.65).sp,
+            lineHeight = 32.5.sp,
         )
-        ToggleChip(
-            modifier = Modifier.weight(1f),
-            text = stringResource(R.string.welcome_tab_register),
-            selected = isRegister,
-            onClick = onRegister,
+        Txt(
+            "Elige cómo usarás la plataforma para preparar tu espacio.",
+            12,
+            color = Subtitle,
+            family = OpenSansCondensed,
+            align = TextAlign.Center,
         )
+        VSpace(12.dp)
+        ModeSwitch(state.isRegisterMode, viewModel::setRegisterMode)
+        VSpace(15.dp)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            RoleCard(
+                letter = "P",
+                title = "Paciente",
+                description = "Mis citas, receta y monturas",
+                selected = state.role == UserRole.PATIENT,
+                onClick = { viewModel.setRole(UserRole.PATIENT) },
+                modifier = Modifier.weight(1f),
+            )
+            RoleCard(
+                letter = "C",
+                title = "Personal clínico",
+                description = "Catálogo, agenda y pacientes",
+                selected = state.role == UserRole.CLINICAL,
+                onClick = { viewModel.setRole(UserRole.CLINICAL) },
+                modifier = Modifier.weight(1f),
+            )
+        }
+        VSpace(18.dp)
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            if (state.isRegisterMode) {
+                LabeledField("Nombre completo", state.name, viewModel::onNameChange, "Nombre")
+            }
+            LabeledField(
+                "Correo electrónico",
+                state.email,
+                viewModel::onEmailChange,
+                "correo@gmail.com",
+                keyboardType = KeyboardType.Email,
+                background = if (state.isRegisterMode) Color(0xFFEEF2FD) else MintWhite,
+            )
+            if (state.isRegisterMode && state.role == UserRole.PATIENT) {
+                LabeledField(
+                    "Teléfono",
+                    state.phone,
+                    viewModel::onPhoneChange,
+                    "999 888 777",
+                    keyboardType = KeyboardType.Phone,
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    FieldLabel("Contraseña", Modifier.weight(1f))
+                    if (state.isRegisterMode) {
+                        Txt("Mín. ${AuthViewModel.MIN_PASSWORD} caracteres", 11, color = Slate400, family = Jakarta)
+                    } else {
+                        Txt("¿Olvidaste tu contraseña?", 11, weight = FontWeight.SemiBold, color = Electric)
+                    }
+                }
+                AuthInput(
+                    value = state.password,
+                    onValueChange = viewModel::onPasswordChange,
+                    placeholder = "Mínimo ${AuthViewModel.MIN_PASSWORD} caracteres",
+                    keyboardType = KeyboardType.Password,
+                    visual =
+                        if (state.passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailing = {
+                        LIcon(
+                            if (state.passwordVisible) R.drawable.lucide_ic_eye_off else R.drawable.lucide_ic_eye,
+                            Slate500,
+                            16.dp,
+                            Modifier.tap(viewModel::togglePasswordVisibility),
+                        )
+                    },
+                )
+            }
+            if (state.isRegisterMode) TermsRow(state.acceptedTerms, viewModel::toggleTerms)
+            ErrorBanner(state.errorMessage)
+            VSpace(4.dp)
+            SolidButton(
+                text = if (state.isRegisterMode) "Crear cuenta" else "Entrar a mi cuenta",
+                onClick = viewModel::submit,
+                background = CtaNavy,
+                height = 48.dp,
+                radius = 12.dp,
+                family = Poppins,
+                fontSize = 14,
+                weight = FontWeight.SemiBold,
+                trailingIcon = R.drawable.lucide_ic_arrow_right,
+                elevation = 10.dp,
+                loading = state.isLoading,
+            )
+        }
+        VSpace(if (state.isRegisterMode) 12.dp else 60.dp)
     }
 }
 
 @Composable
-private fun ToggleChip(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier =
-            modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(if (selected) Color.White else Color.Transparent)
-                .clickable(onClick = onClick)
-                .padding(vertical = 10.dp),
-        contentAlignment = Alignment.Center,
+private fun ModeSwitch(register: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(46.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Periwinkle)
+            .border(1.dp, SkyTint.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+            .padding(4.dp),
     ) {
-        Text(
-            text = text,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = OptiFlowNavy,
-        )
+        listOf(false to "Iniciar sesión", true to "Registrarme").forEach { (mode, label) ->
+            val selected = mode == register
+            Box(
+                Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+                    .then(
+                        if (selected) {
+                            Modifier
+                                .shadow(1.dp, RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(White)
+                        } else {
+                            Modifier
+                        },
+                    ).tap { onChange(mode) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Txt(
+                    label,
+                    12,
+                    weight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    color = if (selected) DeepNavy else Slate500,
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun RoleCard(
+    letter: String,
     title: String,
-    subtitle: String,
-    initial: String,
+    description: String,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val shape = RoundedCornerShape(16.dp)
     Column(
-        modifier =
-            modifier
-                .clip(RoundedCornerShape(16.dp))
-                .border(
-                    width = if (selected) 2.dp else 1.dp,
-                    color = if (selected) OptiFlowNavy else OptiFlowFieldBorder,
-                    shape = RoundedCornerShape(16.dp),
-                )
-                .background(Color.White)
-                .clickable(onClick = onClick)
-                .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier
+            .then(
+                if (selected) {
+                    Modifier.shadow(8.dp, shape, ambientColor = Color(0x240013C1), spotColor = Color(0x240013C1))
+                } else {
+                    Modifier
+                },
+            ).clip(shape)
+            .background(if (selected) Periwinkle else White)
+            .border(if (selected) 2.dp else 1.dp, if (selected) Electric else Slate200, shape)
+            .tap(onClick)
+            .padding(16.dp),
     ) {
         Box(
-            modifier =
-                Modifier
-                    .size(28.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(OptiFlowChipBackground),
+            Modifier.size(32.dp).clip(RoundedCornerShape(12.dp)).background(if (selected) Lavender else Periwinkle),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = initial, fontWeight = FontWeight.Bold, color = OptiFlowNavy)
+            Txt(letter, 14, weight = FontWeight.Bold, color = if (selected) Electric else NavyBlue)
         }
-        Text(text = title, fontWeight = FontWeight.SemiBold, color = OptiFlowNavy, fontSize = 14.sp)
-        Text(text = subtitle, color = OptiFlowMuted, fontSize = 11.sp, lineHeight = 14.sp)
+        VSpace(8.dp)
+        Txt(
+            title,
+            12,
+            weight = FontWeight.SemiBold,
+            color = if (selected) DeepNavy else Slate700,
+            family = Poppins,
+            letterSpacing = (-0.3).sp,
+        )
+        VSpace(2.dp)
+        Txt(
+            description,
+            10,
+            color = if (selected) Slate500 else Slate400,
+            family = OpenSansCondensed,
+            maxLines = 1,
+        )
     }
 }
 
 @Composable
-private fun AuthField(
+private fun FieldLabel(text: String, modifier: Modifier = Modifier) {
+    Txt(text, 12, weight = FontWeight.Bold, color = DeepNavy, letterSpacing = (-0.3).sp, modifier = modifier)
+}
+
+@Composable
+private fun LabeledField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
+    placeholder: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    background: Color = MintWhite,
 ) {
-    Text(text = label, fontWeight = FontWeight.SemiBold, color = OptiFlowNavy)
-    OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        FieldLabel(label)
+        AuthInput(value, onValueChange, placeholder, keyboardType, background = background)
+    }
+}
+
+@Composable
+private fun AuthInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    keyboardType: KeyboardType,
+    visual: VisualTransformation = VisualTransformation.None,
+    background: Color = MintWhite,
+    trailing: @Composable () -> Unit = {},
+) {
+    val shape = RoundedCornerShape(12.dp)
+    BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        shape = RoundedCornerShape(14.dp),
-        colors = fieldColors(),
         singleLine = true,
+        visualTransformation = visual,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        cursorBrush = SolidColor(Electric),
+        textStyle = TextStyle(fontFamily = Jakarta, fontWeight = FontWeight.Medium, fontSize = 12.sp, color = DeepNavy),
+        decorationBox = { inner ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .height(38.dp)
+                    .clip(shape)
+                    .background(background)
+                    .border(1.dp, SkyTint, shape)
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(Modifier.weight(1f)) {
+                    if (value.isEmpty()) {
+                        Txt(placeholder, 12, weight = FontWeight.Medium, color = Slate500)
+                    }
+                    inner()
+                }
+                trailing()
+            }
+        },
     )
 }
 
 @Composable
-private fun fieldColors() =
-    OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = OptiFlowNavy,
-        unfocusedBorderColor = OptiFlowFieldBorder,
-        focusedContainerColor = Color(0xFFF8FBFE),
-        unfocusedContainerColor = Color(0xFFF8FBFE),
-    )
+private fun TermsRow(checked: Boolean, onToggle: () -> Unit) {
+    Row(Modifier.fillMaxWidth().tap(onToggle), verticalAlignment = Alignment.Top) {
+        Box(
+            Modifier
+                .padding(top = 2.dp)
+                .size(18.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(if (checked) Electric else White)
+                .border(1.5.dp, if (checked) Electric else DeepNavy, RoundedCornerShape(4.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (checked) LIcon(R.drawable.lucide_ic_check, White, 12.dp)
+        }
+        HSpace(10.dp)
+        androidx.compose.material3.Text(
+            buildAnnotatedString {
+                append("Acepto los ")
+                withStyle(SpanStyle(color = Electric, fontWeight = FontWeight.SemiBold)) { append("Términos de Servicio") }
+                append(" y la ")
+                withStyle(SpanStyle(color = Electric, fontWeight = FontWeight.SemiBold)) { append("Política de Privacidad") }
+                append(" de OptiFlow.")
+            },
+            style = TextStyle(fontFamily = Jakarta, fontSize = 11.sp, color = Slate500, lineHeight = 16.sp),
+        )
+    }
+}
