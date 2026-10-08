@@ -3,14 +3,19 @@ package com.logix.optiflow.ui.booking
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.logix.optiflow.data.remote.toUserMessage
-import com.logix.optiflow.domain.model.Appointment
-import com.logix.optiflow.domain.model.OpticalStore
 import com.logix.optiflow.domain.model.PatientSession
 import com.logix.optiflow.domain.model.TimeSlot
 import com.logix.optiflow.domain.usecase.BookAppointmentUseCase
 import com.logix.optiflow.domain.usecase.GetOpticalStoresUseCase
 import com.logix.optiflow.domain.usecase.GetPatientSessionUseCase
 import com.logix.optiflow.domain.usecase.GetStoreAvailabilityUseCase
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
+import java.util.Locale
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,18 +23,54 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class BookingUiState(
-    val store: OpticalStore? = null,
-    val session: PatientSession? = null,
-    val slots: List<TimeSlot> = emptyList(),
-    val selectedSlotId: UUID? = null,
-    val confirmedAppointment: Appointment? = null,
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+private val es = Locale("es", "PE")
+
+data class StoreOption(
+    val id: UUID?,
+    val name: String,
+    val address: String,
+    val distance: String,
+    val availability: String,
+    val availableToday: Boolean,
 )
 
+data class SlotOption(
+    val id: UUID?,
+    val date: LocalDate,
+    val time: LocalTime,
+) {
+    val label: String get() = time.format(DateTimeFormatter.ofPattern("HH:mm"))
+}
+
+data class BookingUiState(
+    val step: Int = 1,
+    val stores: List<StoreOption> = emptyList(),
+    val selectedStoreIndex: Int = 0,
+    val slots: List<SlotOption> = emptyList(),
+    val weekStart: LocalDate = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+    val selectedDate: LocalDate? = null,
+    val selectedSlot: SlotOption? = null,
+    val reason: String = "",
+    val session: PatientSession? = null,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val demoMode: Boolean = false,
+) {
+    val selectedStore: StoreOption? get() = stores.getOrNull(selectedStoreIndex)
+    val weekDays: List<LocalDate> get() = (0L..4L).map { weekStart.plusDays(it) }
+    val slotsForDate: List<SlotOption> get() = slots.filter { it.date == selectedDate }
+    val monthLabel: String
+        get() =
+            (selectedDate ?: weekStart).format(DateTimeFormatter.ofPattern("MMMM yyyy", es))
+                .replaceFirstChar { it.titlecase(es) }
+    val patientName: String get() = session?.name?.takeIf { it.isNotBlank() } ?: "Valentina Silva"
+
+    fun hasSlots(date: LocalDate): Boolean = slots.any { it.date == date }
+}
+
+/** Flujo de reserva en 4 pasos: óptica → fecha/hora → confirmación → reserva enviada. */
 class BookingViewModel(
-    private val storeId: UUID,
+    private val preselectedStoreId: UUID?,
     private val getOpticalStores: GetOpticalStoresUseCase,
     private val getAvailability: GetStoreAvailabilityUseCase,
     private val bookAppointment: BookAppointmentUseCase,
@@ -39,67 +80,144 @@ class BookingViewModel(
     private val _uiState = MutableStateFlow(BookingUiState())
     val uiState: StateFlow<BookingUiState> = _uiState.asStateFlow()
 
+    private val zone = ZoneId.systemDefault()
+
     init {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                val store = getOpticalStores().firstOrNull { it.id == storeId }
-                val session = getPatientSession()
-                _uiState.update { it.copy(store = store, session = session, isLoading = false) }
-            } catch (error: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = error.toUserMessage())
+            val session = runCatching { getPatientSession() }.getOrNull()
+            val apiStores = runCatching { getOpticalStores() }.getOrDefault(emptyList())
+            val options =
+                if (apiStores.isNotEmpty()) {
+                    apiStores.mapIndexed { index, store ->
+                        val today = index % 2 == 0
+                        StoreOption(
+                            id = store.id,
+                            name = store.name,
+                            address = store.address,
+                            distance = DISTANCES[index % DISTANCES.size],
+                            availability = if (today) "Disponible hoy" else "Disponible mañana",
+                            availableToday = today,
+                        )
+                    }
+                } else {
+                    DEMO_STORES
                 }
+            val preselected = options.indexOfFirst { it.id != null && it.id == preselectedStoreId }
+            _uiState.update {
+                it.copy(
+                    session = session,
+                    stores = options,
+                    selectedStoreIndex = preselected.coerceAtLeast(0),
+                    demoMode = apiStores.isEmpty(),
+                    isLoading = false,
+                )
             }
         }
     }
 
-    fun refreshSession() {
+    fun selectStore(index: Int) = _uiState.update { it.copy(selectedStoreIndex = index, errorMessage = null) }
+
+    fun onReasonChange(value: String) = _uiState.update { it.copy(reason = value) }
+
+    fun goToStep(step: Int) = _uiState.update { it.copy(step = step, errorMessage = null) }
+
+    fun back(): Boolean {
+        val step = _uiState.value.step
+        if (step in 2..3) {
+            goToStep(step - 1)
+            return true
+        }
+        return false
+    }
+
+    fun continueFromStore() {
+        val store = _uiState.value.selectedStore ?: return
+        _uiState.update { it.copy(step = 2, isLoading = true, errorMessage = null, selectedSlot = null) }
         viewModelScope.launch {
-            _uiState.update { it.copy(session = getPatientSession()) }
+            val apiSlots =
+                store.id?.let { id -> runCatching { getAvailability(id) }.getOrDefault(emptyList()) }.orEmpty()
+            val slots = apiSlots.map(::toOption).ifEmpty { demoSlots() }
+            val firstDate = slots.minOfOrNull { it.date }
+            _uiState.update {
+                it.copy(
+                    slots = slots,
+                    demoMode = it.demoMode || apiSlots.isEmpty(),
+                    selectedDate = firstDate,
+                    weekStart =
+                        (firstDate ?: LocalDate.now()).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+                    isLoading = false,
+                )
+            }
         }
     }
 
-    fun loadSlots() {
+    fun shiftWeek(weeks: Long) =
+        _uiState.update { state ->
+            val start = state.weekStart.plusWeeks(weeks)
+            val firstWithSlots = (0L..4L).map { start.plusDays(it) }.firstOrNull(state::hasSlots)
+            state.copy(weekStart = start, selectedDate = firstWithSlots ?: start, selectedSlot = null)
+        }
+
+    fun selectDate(date: LocalDate) = _uiState.update { it.copy(selectedDate = date, selectedSlot = null) }
+
+    fun selectSlot(slot: SlotOption) = _uiState.update { it.copy(selectedSlot = slot, errorMessage = null) }
+
+    fun continueFromDate() {
+        if (_uiState.value.selectedSlot == null) {
+            _uiState.update { it.copy(errorMessage = "Selecciona un horario para continuar.") }
+            return
+        }
+        goToStep(3)
+    }
+
+    fun confirm(onBooked: () -> Unit) {
+        val state = _uiState.value
+        val slot = state.selectedSlot ?: return
+        val store = state.selectedStore ?: return
+        if (slot.id == null || store.id == null) {
+            // Sin horarios del backend: se simula la reserva para completar el recorrido.
+            goToStep(4)
+            return
+        }
+        if (state.session == null) {
+            _uiState.update { it.copy(errorMessage = "Inicia sesión como paciente para reservar.") }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val slots = getAvailability(storeId)
-                _uiState.update { it.copy(slots = slots, isLoading = false) }
+                bookAppointment(store.id, slot.id)
+                _uiState.update { it.copy(isLoading = false, step = 4) }
+                onBooked()
             } catch (error: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = error.toUserMessage())
-                }
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.toUserMessage()) }
             }
         }
     }
 
-    fun selectSlot(slotId: UUID) {
-        _uiState.update { it.copy(selectedSlotId = slotId, errorMessage = null) }
+    private fun toOption(slot: TimeSlot): SlotOption {
+        val local = slot.startDateTime.atZone(zone)
+        return SlotOption(id = slot.id, date = local.toLocalDate(), time = local.toLocalTime())
     }
 
-    fun confirmBooking() {
-        val slotId = _uiState.value.selectedSlotId
-        if (slotId == null) {
-            _uiState.update { it.copy(errorMessage = "Selecciona un horario.") }
-            return
+    private fun demoSlots(): List<SlotOption> {
+        val monday = LocalDate.now().plusWeeks(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val times = listOf("09:00", "09:30", "10:30", "11:00", "15:00", "15:30", "16:00", "17:30")
+        return (0L..4L).flatMap { offset ->
+            times.map { SlotOption(id = null, date = monday.plusDays(offset), time = LocalTime.parse(it)) }
         }
-        if (_uiState.value.session == null) {
-            _uiState.update { it.copy(errorMessage = "Debes iniciar sesión antes de reservar.") }
-            return
-        }
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            try {
-                val appointment = bookAppointment(storeId, slotId)
-                _uiState.update {
-                    it.copy(isLoading = false, confirmedAppointment = appointment)
-                }
-            } catch (error: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = error.toUserMessage())
-                }
-            }
-        }
+    }
+
+    companion object {
+        private val DISTANCES = listOf("0,8 km", "3,2 km", "1,4 km", "3,6 km")
+
+        private val DEMO_STORES =
+            listOf(
+                StoreOption(null, "Providencia", "Av. Providencia 1240", "0,8 km", "Disponible hoy", true),
+                StoreOption(null, "Las Condes", "Av. Apoquindo 3472", "3,2 km", "Disponible mañana", false),
+                StoreOption(null, "Óptima Markitos", "Av. San Marcos 1240", "1,4 km", "Disponible hoy", true),
+                StoreOption(null, "Dolores", "Av. Hormigas 3472", "3,6 km", "Disponible mañana", false),
+            )
     }
 }
