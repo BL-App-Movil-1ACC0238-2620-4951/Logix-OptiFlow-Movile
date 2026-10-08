@@ -26,134 +26,107 @@ data class AuthUiState(
     val isRegisterMode: Boolean = false,
     val role: UserRole = UserRole.PATIENT,
     val passwordVisible: Boolean = false,
+    val acceptedTerms: Boolean = false,
     val session: PatientSession? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val successMessage: String? = null,
-    val loginSucceeded: Boolean = false,
+    val authenticatedAs: UserRole? = null,
 )
 
 class AuthViewModel(
     private val registerPatient: RegisterPatientUseCase,
     private val loginPatient: LoginPatientUseCase,
     private val getPatientSession: GetPatientSessionUseCase,
-    private val clearSession: suspend () -> Unit,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     init {
-        refreshSession()
-    }
-
-    fun onNameChange(value: String) = _uiState.update { it.copy(name = value) }
-    fun onEmailChange(value: String) = _uiState.update { it.copy(email = value) }
-    fun onPhoneChange(value: String) = _uiState.update { it.copy(phone = value) }
-    fun onPasswordChange(value: String) = _uiState.update { it.copy(password = value) }
-
-    fun setRegisterMode(register: Boolean) {
-        _uiState.update { it.copy(isRegisterMode = register, errorMessage = null, successMessage = null) }
-    }
-
-    fun setRole(role: UserRole) {
-        _uiState.update { it.copy(role = role, errorMessage = null) }
-    }
-
-    fun togglePasswordVisibility() {
-        _uiState.update { it.copy(passwordVisible = !it.passwordVisible) }
-    }
-
-    fun refreshSession() {
         viewModelScope.launch {
-            val session = getPatientSession()
-            _uiState.update { it.copy(session = session, loginSucceeded = false) }
+            _uiState.update { it.copy(session = getPatientSession()) }
         }
     }
 
-    fun continueWithSavedSession() {
-        val session = _uiState.value.session
-        if (session?.token.isNullOrBlank()) {
-            _uiState.update { it.copy(errorMessage = "Inicia sesión para continuar.") }
-            return
-        }
-        _uiState.update { it.copy(loginSucceeded = true, errorMessage = null) }
-    }
+    fun onNameChange(value: String) = _uiState.update { it.copy(name = value, errorMessage = null) }
+    fun onEmailChange(value: String) = _uiState.update { it.copy(email = value, errorMessage = null) }
+    fun onPhoneChange(value: String) = _uiState.update { it.copy(phone = value, errorMessage = null) }
+    fun onPasswordChange(value: String) = _uiState.update { it.copy(password = value, errorMessage = null) }
+    fun toggleTerms() = _uiState.update { it.copy(acceptedTerms = !it.acceptedTerms, errorMessage = null) }
+
+    fun setRegisterMode(register: Boolean) =
+        _uiState.update { it.copy(isRegisterMode = register, errorMessage = null) }
+
+    fun setRole(role: UserRole) = _uiState.update { it.copy(role = role, errorMessage = null) }
+
+    fun togglePasswordVisibility() = _uiState.update { it.copy(passwordVisible = !it.passwordVisible) }
+
+    fun consumeAuthenticated() = _uiState.update { it.copy(authenticatedAs = null) }
 
     fun submit() {
-        if (_uiState.value.role == UserRole.CLINICAL) {
-            _uiState.update {
-                it.copy(errorMessage = "Personal clínico estará disponible en una próxima versión.")
-            }
+        val state = _uiState.value
+        val error = validate(state)
+        if (error != null) {
+            _uiState.update { it.copy(errorMessage = error) }
             return
         }
-        if (_uiState.value.isRegisterMode) {
-            register()
-        } else {
-            login()
+        if (state.role == UserRole.CLINICAL) {
+            // El backend aún no tiene cuentas de personal: el acceso del personal es de demostración.
+            _uiState.update { it.copy(authenticatedAs = UserRole.CLINICAL, errorMessage = null) }
+            return
         }
+        if (state.isRegisterMode) register() else login()
     }
 
-    fun register() {
+    private fun validate(state: AuthUiState): String? {
+        if (state.isRegisterMode && state.name.isBlank()) return "Ingresa tu nombre completo."
+        if (!state.email.contains('@')) return "Ingresa un correo válido."
+        if (state.isRegisterMode && state.role == UserRole.PATIENT && state.phone.isBlank()) {
+            return "Ingresa tu teléfono."
+        }
+        if (state.password.length < MIN_PASSWORD) return "La contraseña debe tener al menos $MIN_PASSWORD caracteres."
+        if (state.isRegisterMode && !state.acceptedTerms) return "Acepta los Términos de Servicio para continuar."
+        return null
+    }
+
+    private fun register() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val email = _uiState.value.email.trim()
-                val password = _uiState.value.password
+                val state = _uiState.value
+                val email = state.email.trim()
                 registerPatient(
-                    name = _uiState.value.name.trim(),
+                    name = state.name.trim(),
                     email = email,
-                    phone = _uiState.value.phone.trim(),
-                    password = password,
+                    phone = state.phone.trim(),
+                    password = state.password,
                 )
-                loginPatient(email = email, password = password)
+                loginPatient(email = email, password = state.password)
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isRegisterMode = false,
-                        session = getPatientSession(),
-                        loginSucceeded = true,
-                        successMessage = null,
-                    )
+                    it.copy(isLoading = false, session = getPatientSession(), authenticatedAs = UserRole.PATIENT)
                 }
             } catch (error: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = error.toUserMessage())
-                }
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.toUserMessage()) }
             }
         }
     }
 
-    fun login() {
+    private fun login() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                loginPatient(
-                    email = _uiState.value.email.trim(),
-                    password = _uiState.value.password,
-                )
+                loginPatient(email = _uiState.value.email.trim(), password = _uiState.value.password)
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        session = getPatientSession(),
-                        loginSucceeded = true,
-                        successMessage = null,
-                    )
+                    it.copy(isLoading = false, session = getPatientSession(), authenticatedAs = UserRole.PATIENT)
                 }
             } catch (error: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = error.toUserMessage())
-                }
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.toUserMessage()) }
             }
         }
     }
 
-    fun logout() {
-        viewModelScope.launch {
-            clearSession()
-            _uiState.update {
-                it.copy(session = null, loginSucceeded = false, successMessage = "Sesión cerrada.")
-            }
-        }
+    companion object {
+        /** El backend exige 8 caracteres como mínimo para la contraseña del paciente. */
+        const val MIN_PASSWORD = 8
     }
 }

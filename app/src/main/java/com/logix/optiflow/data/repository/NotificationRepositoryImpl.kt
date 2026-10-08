@@ -23,7 +23,7 @@ class NotificationRepositoryImpl(
             val fromApi = mutableListOf<NotificationItem>()
 
             runCatching {
-                api.getPatientAppointments(patientId).value.orEmpty()
+                api.getPatientAppointments(patientId)
             }.getOrDefault(emptyList()).forEach { appt ->
                 val whenLabel =
                     DateTimeFormatter.ofPattern("EEEE", Locale("es", "PE"))
@@ -45,7 +45,7 @@ class NotificationRepositoryImpl(
             }
 
             runCatching {
-                api.getPatientWorkOrders(patientId).value.orEmpty()
+                api.getPatientWorkOrders(patientId)
             }.getOrDefault(emptyList()).forEach { order ->
                 val body =
                     when (order.status.uppercase(Locale.US)) {
