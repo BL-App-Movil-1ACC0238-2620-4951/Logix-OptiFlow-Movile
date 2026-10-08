@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -102,8 +103,13 @@ fun AuthScreen(
 
             Image(
                 painter = painterResource(R.drawable.optiflow_logo),
-                contentDescription = null,
-                modifier = Modifier.size(width = 120.dp, height = 140.dp),
+                contentDescription = stringResource(R.string.welcome_brand_name),
+                contentScale = ContentScale.Fit,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(168.dp)
+                        .padding(horizontal = 56.dp),
             )
             Text(
                 text = stringResource(R.string.welcome_brand_name),

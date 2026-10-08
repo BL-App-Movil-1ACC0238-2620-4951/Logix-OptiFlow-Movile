@@ -14,5 +14,14 @@ fun Throwable.toUserMessage(): String {
         }
         return message ?: "Request failed with code ${code()}"
     }
-    return message ?: "Unexpected error"
+    val raw = message.orEmpty()
+    if (
+        raw.contains("10.0.2.2", ignoreCase = true) ||
+        raw.contains("failed to connect", ignoreCase = true) ||
+        raw.contains("Unable to resolve host", ignoreCase = true)
+    ) {
+        return "No se pudo conectar al servidor. Si usas la variante local, levanta el backend en tu PC (puerto 8080). " +
+            "Si no, en Android Studio elige Build Variants → prodDebug para usar Render en la nube."
+    }
+    return raw.ifBlank { "Error inesperado. Intenta de nuevo." }
 }
