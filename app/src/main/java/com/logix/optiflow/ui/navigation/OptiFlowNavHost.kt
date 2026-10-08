@@ -12,6 +12,7 @@ import com.logix.optiflow.ui.search.StoreSearchScreen
 import java.util.UUID
 
 object Routes {
+    const val WELCOME = "welcome"
     const val SEARCH = "search"
     const val AUTH = "auth"
     const val BOOKING = "booking/{storeId}"
@@ -23,7 +24,17 @@ object Routes {
 fun OptiFlowNavHost() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.SEARCH) {
+    NavHost(navController = navController, startDestination = Routes.WELCOME) {
+        composable(Routes.WELCOME) {
+            AuthScreen(
+                onBack = null,
+                onAuthenticated = {
+                    navController.navigate(Routes.SEARCH) {
+                        popUpTo(Routes.WELCOME) { inclusive = true }
+                    }
+                },
+            )
+        }
         composable(Routes.SEARCH) {
             StoreSearchScreen(
                 onOpenAuth = { navController.navigate(Routes.AUTH) },

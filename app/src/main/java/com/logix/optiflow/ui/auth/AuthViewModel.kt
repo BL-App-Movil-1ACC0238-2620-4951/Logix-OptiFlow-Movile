@@ -13,15 +13,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+enum class UserRole {
+    PATIENT,
+    CLINICAL,
+}
+
 data class AuthUiState(
     val name: String = "",
     val email: String = "",
     val phone: String = "",
     val password: String = "",
+    val isRegisterMode: Boolean = false,
+    val role: UserRole = UserRole.PATIENT,
+    val passwordVisible: Boolean = false,
     val session: PatientSession? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
+    val loginSucceeded: Boolean = false,
 )
 
 class AuthViewModel(
@@ -43,9 +52,45 @@ class AuthViewModel(
     fun onPhoneChange(value: String) = _uiState.update { it.copy(phone = value) }
     fun onPasswordChange(value: String) = _uiState.update { it.copy(password = value) }
 
+    fun setRegisterMode(register: Boolean) {
+        _uiState.update { it.copy(isRegisterMode = register, errorMessage = null, successMessage = null) }
+    }
+
+    fun setRole(role: UserRole) {
+        _uiState.update { it.copy(role = role, errorMessage = null) }
+    }
+
+    fun togglePasswordVisibility() {
+        _uiState.update { it.copy(passwordVisible = !it.passwordVisible) }
+    }
+
     fun refreshSession() {
         viewModelScope.launch {
-            _uiState.update { it.copy(session = getPatientSession()) }
+            val session = getPatientSession()
+            _uiState.update { it.copy(session = session, loginSucceeded = false) }
+        }
+    }
+
+    fun continueWithSavedSession() {
+        val session = _uiState.value.session
+        if (session?.token.isNullOrBlank()) {
+            _uiState.update { it.copy(errorMessage = "Inicia sesión para continuar.") }
+            return
+        }
+        _uiState.update { it.copy(loginSucceeded = true, errorMessage = null) }
+    }
+
+    fun submit() {
+        if (_uiState.value.role == UserRole.CLINICAL) {
+            _uiState.update {
+                it.copy(errorMessage = "Personal clínico estará disponible en una próxima versión.")
+            }
+            return
+        }
+        if (_uiState.value.isRegisterMode) {
+            register()
+        } else {
+            login()
         }
     }
 
@@ -62,8 +107,9 @@ class AuthViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isRegisterMode = false,
                         session = getPatientSession(),
-                        successMessage = "Registro exitoso. Inicia sesión para guardar el token.",
+                        successMessage = "Cuenta creada. Ahora inicia sesión.",
                     )
                 }
             } catch (error: Exception) {
@@ -86,7 +132,8 @@ class AuthViewModel(
                     it.copy(
                         isLoading = false,
                         session = getPatientSession(),
-                        successMessage = "Sesión iniciada.",
+                        loginSucceeded = true,
+                        successMessage = null,
                     )
                 }
             } catch (error: Exception) {
@@ -100,7 +147,9 @@ class AuthViewModel(
     fun logout() {
         viewModelScope.launch {
             clearSession()
-            _uiState.update { it.copy(session = null, successMessage = "Sesión cerrada.") }
+            _uiState.update {
+                it.copy(session = null, loginSucceeded = false, successMessage = "Sesión cerrada.")
+            }
         }
     }
 }

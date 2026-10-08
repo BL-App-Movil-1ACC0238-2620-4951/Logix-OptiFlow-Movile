@@ -53,4 +53,19 @@
     <string name="flow_search_min_rating_hint">Ej. 4.0 (usa /optical-stores/search)</string>
     <string name="flow_filter_rating_40">★ 4.0+</string>
     <string name="flow_filter_rating_45">★ 4.5+</string>
+    <string name="welcome_brand_name">OptiFlow</string>
+    <string name="welcome_tagline">Tu óptica, siempre cerca</string>
+    <string name="welcome_card_title">Accede a OptiFlow</string>
+    <string name="welcome_card_subtitle">Elige cómo usarás la plataforma para preparar tu espacio.</string>
+    <string name="welcome_tab_login">Iniciar sesión</string>
+    <string name="welcome_tab_register">Registrarme</string>
+    <string name="welcome_role_patient">Paciente</string>
+    <string name="welcome_role_patient_desc">Mis citas, receta y monturas</string>
+    <string name="welcome_role_clinical">Personal clínico</string>
+    <string name="welcome_role_clinical_desc">Catálogo, agenda y pacientes</string>
+    <string name="welcome_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="welcome_password_placeholder">Mínimo 8 caracteres</string>
+    <string name="welcome_login_cta">Entrar a mi cuenta</string>
+    <string name="welcome_register_cta">Crear mi cuenta</string>
+    <string name="welcome_continue_session">Continuar con mi sesión</string>
 </resources>

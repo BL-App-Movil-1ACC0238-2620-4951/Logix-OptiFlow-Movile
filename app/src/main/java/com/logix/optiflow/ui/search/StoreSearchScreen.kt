@@ -3,9 +3,8 @@ package com.logix.optiflow.ui.search
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,7 +32,6 @@ import com.logix.optiflow.ui.ViewModelFactories
 import com.logix.optiflow.ui.components.OptiFlowScaffold
 import java.util.UUID
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StoreSearchScreen(
     onOpenAuth: () -> Unit,
@@ -73,10 +71,7 @@ fun StoreSearchScreen(
                 placeholder = { Text(stringResource(R.string.flow_search_min_rating_hint)) },
                 singleLine = true,
             )
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(
                     selected = uiState.minRatingQuery == "4.0",
                     onClick = { viewModel.setMinRatingPreset(4.0) },

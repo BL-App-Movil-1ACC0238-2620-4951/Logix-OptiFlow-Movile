@@ -9,6 +9,6 @@ fun OpticalStoreDto.toDomain(): OpticalStore =
         name = name,
         address = address,
         phone = phone,
-        rating = rating?.toDouble(),
+        rating = rating,
         status = status,
     )

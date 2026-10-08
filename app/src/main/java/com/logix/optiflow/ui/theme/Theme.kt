@@ -7,14 +7,14 @@ import androidx.compose.ui.graphics.Color
 
 private val OptiFlowColorScheme =
     lightColorScheme(
-        primary = OptiFlowBlue,
+        primary = OptiFlowNavy,
         onPrimary = Color.White,
-        primaryContainer = OptiFlowBlueDark,
+        primaryContainer = OptiFlowBlue,
         secondary = OptiFlowBlueDark,
-        background = OptiFlowSurface,
-        onBackground = OptiFlowOnSurface,
+        background = OptiFlowGradientTop,
+        onBackground = OptiFlowNavy,
         surface = Color.White,
-        onSurface = OptiFlowOnSurface,
+        onSurface = OptiFlowNavy,
     )
 
 @Composable

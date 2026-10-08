@@ -8,7 +8,6 @@ import com.logix.optiflow.data.remote.dto.OpticalStoreListResponse
 import com.logix.optiflow.data.remote.dto.PatientDto
 import com.logix.optiflow.data.remote.dto.RegisterPatientRequest
 import com.logix.optiflow.data.remote.dto.TimeSlotListResponse
-import java.math.BigDecimal
 import java.util.UUID
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -28,7 +27,7 @@ interface SearchBookingApi {
     suspend fun searchOpticalStores(
         @Query("name") name: String? = null,
         @Query("address") address: String? = null,
-        @Query("minRating") minRating: BigDecimal? = null,
+        @Query("minRating") minRating: Double? = null,
     ): OpticalStoreListResponse
 
     @GET("optical-stores/{id}/availability")
