@@ -9,6 +9,7 @@ import com.logix.optiflow.data.remote.dto.OpticalStoreListResponse
 import com.logix.optiflow.data.remote.dto.PatientDto
 import com.logix.optiflow.data.remote.dto.RegisterPatientRequest
 import com.logix.optiflow.data.remote.dto.TimeSlotListResponse
+import com.logix.optiflow.data.remote.dto.WorkOrderListResponse
 import java.util.UUID
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -50,4 +51,14 @@ interface SearchBookingApi {
     suspend fun bookAppointment(
         @Body request: BookAppointmentRequest,
     ): AppointmentDto
+
+    @GET("patients/{patientId}/appointments")
+    suspend fun getPatientAppointments(
+        @Path("patientId") patientId: UUID,
+    ): AppointmentListResponse
+
+    @GET("patients/{patientId}/work-orders")
+    suspend fun getPatientWorkOrders(
+        @Path("patientId") patientId: UUID,
+    ): WorkOrderListResponse
 }

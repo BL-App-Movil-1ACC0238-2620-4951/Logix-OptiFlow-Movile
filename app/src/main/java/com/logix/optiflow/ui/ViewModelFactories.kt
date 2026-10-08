@@ -6,6 +6,7 @@ import com.logix.optiflow.di.SearchBookingModule
 import com.logix.optiflow.ui.auth.AuthViewModel
 import com.logix.optiflow.ui.booking.BookingViewModel
 import com.logix.optiflow.ui.home.HomeViewModel
+import com.logix.optiflow.ui.notifications.NotificationsViewModel
 import com.logix.optiflow.ui.search.StoreSearchViewModel
 import java.util.UUID
 
@@ -16,6 +17,15 @@ object ViewModelFactories {
             StoreSearchViewModel(
                 getOpticalStores = SearchBookingModule.getOpticalStoresUseCase,
                 searchOpticalStores = SearchBookingModule.searchOpticalStoresUseCase,
+            )
+        }
+
+    val notifications: ViewModelProvider.Factory =
+        simpleFactory {
+            NotificationsViewModel(
+                getPatientSession = SearchBookingModule.getPatientSessionUseCase,
+                getNotifications = SearchBookingModule.getNotificationsUseCase,
+                notificationRepository = SearchBookingModule.notificationRepository,
             )
         }
 

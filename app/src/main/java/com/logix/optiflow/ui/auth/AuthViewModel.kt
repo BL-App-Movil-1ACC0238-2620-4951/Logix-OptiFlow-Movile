@@ -98,18 +98,22 @@ class AuthViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
             try {
+                val email = _uiState.value.email.trim()
+                val password = _uiState.value.password
                 registerPatient(
                     name = _uiState.value.name.trim(),
-                    email = _uiState.value.email.trim(),
+                    email = email,
                     phone = _uiState.value.phone.trim(),
-                    password = _uiState.value.password,
+                    password = password,
                 )
+                loginPatient(email = email, password = password)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isRegisterMode = false,
                         session = getPatientSession(),
-                        successMessage = "Cuenta creada. Ahora inicia sesión.",
+                        loginSucceeded = true,
+                        successMessage = null,
                     )
                 }
             } catch (error: Exception) {

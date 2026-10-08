@@ -62,6 +62,7 @@ fun HomeScreen(
     onViewAllAppointments: () -> Unit,
     onOpenSearch: () -> Unit,
     onOpenOrders: () -> Unit,
+    onOpenNotifications: () -> Unit,
     onTryVirtual: () -> Unit,
     onShowSnackbar: (String) -> Unit,
     viewModel: HomeViewModel = viewModel(factory = ViewModelFactories.home),
@@ -75,7 +76,10 @@ fun HomeScreen(
                 .background(OptiFlowGradientBottom)
                 .verticalScroll(rememberScrollState()),
     ) {
-        HomeTopBar(greetingName = uiState.greetingName)
+        HomeTopBar(
+            greetingName = uiState.greetingName,
+            onOpenNotifications = onOpenNotifications,
+        )
 
         Column(
             modifier = Modifier.padding(horizontal = 16.dp),
@@ -109,7 +113,10 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeTopBar(greetingName: String) {
+private fun HomeTopBar(
+    greetingName: String,
+    onOpenNotifications: () -> Unit,
+) {
     Box(
         modifier =
             Modifier
@@ -133,12 +140,13 @@ private fun HomeTopBar(greetingName: String) {
                     Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f)),
+                        .background(Color.White.copy(alpha = 0.15f))
+                        .clickable(onClick = onOpenNotifications),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Filled.Notifications,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.notifications_title),
                     tint = Color.White,
                 )
             }

@@ -14,6 +14,59 @@ Cliente Android del sprint **Search & Booking** (US05–US07): bienvenida/login 
 
 > Render en plan free puede “dormir” el servicio: la primera petición puede tardar ~1 minuto. Vuelve a intentar o abre Swagger en el navegador para despertarlo.
 
+### ¿Cómo “activar” el backend?
+
+**No hay un comando dentro de este repo móvil.** La app solo es cliente; el servidor es otro proyecto (**Logix-OptiFlow-Back-End** o similar).
+
+#### Opción A — Sin terminal (recomendada)
+
+1. Android Studio → **Build Variants** → **`prodDebug`**.
+2. Abre en el navegador [Swagger](https://logix-optiflow-back-end.onrender.com/swagger-ui/index.html) y espera a que responda (despierta Render).
+3. Run de la app e inicia sesión o regístrate.
+
+#### Opción B — Backend en tu PC (`localDebug`)
+
+En **PowerShell**, en la carpeta del repositorio **backend** (no la app móvil):
+
+```powershell
+# Maven (Spring Boot)
+.\mvnw.cmd spring-boot:run
+
+# o Gradle (Spring Boot), si el backend usa Gradle:
+.\gradlew.bat bootRun
+```
+
+Deja esa ventana abierta. El API debe quedar en **`http://localhost:8080`**.
+
+Comprueba en otra terminal:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/optical-stores"
+```
+
+Si ves JSON con ópticas, el backend está activo. Entonces en Android Studio usa **`localDebug`** (el emulador llega a tu PC con `10.0.2.2:8080`).
+
+**Celular físico con backend local:** en `local.properties` del móvil:
+
+```properties
+api.base.url.local=http://TU_IP_LAN:8080/
+```
+
+(sustituye `TU_IP_LAN` por la IPv4 de tu PC, por ejemplo `192.168.1.10`).
+
+Desde la raíz de **este** repo puedes probar conectividad (no levanta el servidor):
+
+```powershell
+.\scripts\check-backend.ps1 -Target prod
+.\scripts\check-backend.ps1 -Target local
+```
+
+### Registro e inicio de sesión en la app
+
+- Tras **Registrarme**, la app hace **login automático** y guarda el **token** en el teléfono (DataStore).
+- **Continuar con mi sesión** solo funciona si ya hubo un login con token (no basta con haber registrado en una versión antigua de la app).
+- Contraseña mínima **8 caracteres**. Mismo correo/contraseña que en Swagger `POST /login`.
+
 ## Ejecutar la app
 
 1. Abre el proyecto en **Android Studio** y sincroniza Gradle.

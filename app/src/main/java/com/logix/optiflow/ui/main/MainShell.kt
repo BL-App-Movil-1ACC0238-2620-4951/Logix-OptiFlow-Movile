@@ -38,6 +38,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.logix.optiflow.R
 import com.logix.optiflow.ui.home.HomeScreen
+import com.logix.optiflow.ui.notifications.NotificationsScreen
 import com.logix.optiflow.ui.navigation.Routes
 import com.logix.optiflow.ui.profile.ProfileScreen
 import com.logix.optiflow.ui.search.StoreSearchScreen
@@ -52,6 +53,7 @@ object MainRoutes {
     const val APPOINTMENTS = "main/appointments"
     const val ORDERS = "main/orders"
     const val PROFILE = "main/profile"
+    const val NOTIFICATIONS = "main/notifications"
 }
 
 @Composable
@@ -74,7 +76,7 @@ fun MainShell(
         bottomBar = {
             NavigationBar(containerColor = Color.White) {
                 BottomNavItem(
-                    selected = currentRoute == MainRoutes.HOME,
+                    selected = currentRoute == MainRoutes.HOME || currentRoute == MainRoutes.NOTIFICATIONS,
                     label = stringResource(R.string.nav_home),
                     icon = Icons.Filled.Home,
                     onClick = { navigateTab(tabNavController, MainRoutes.HOME) },
@@ -122,10 +124,22 @@ fun MainShell(
                     onOpenOrders = {
                         tabNavController.navigate(MainRoutes.ORDERS) { launchSingleTop = true }
                     },
+                    onOpenNotifications = {
+                        tabNavController.navigate(MainRoutes.NOTIFICATIONS) { launchSingleTop = true }
+                    },
                     onTryVirtual = {
                         showMessage("Prueba virtual AR — disponible en una próxima versión.")
                     },
                     onShowSnackbar = ::showMessage,
+                )
+            }
+            composable(MainRoutes.NOTIFICATIONS) {
+                NotificationsScreen(
+                    onBack = { tabNavController.popBackStack() },
+                    onOpenSearch = {
+                        tabNavController.popBackStack()
+                        tabNavController.navigate(MainRoutes.SEARCH) { launchSingleTop = true }
+                    },
                 )
             }
             composable(MainRoutes.SEARCH) {

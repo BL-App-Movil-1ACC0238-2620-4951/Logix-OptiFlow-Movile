@@ -97,4 +97,7 @@
     <string name="profile_no_session">Inicia sesión para ver tu perfil.</string>
     <string name="profile_patient_id">ID paciente: %1$s</string>
     <string name="profile_refresh">Actualizar datos</string>
+    <string name="notifications_title">Notificaciones</string>
+    <string name="notifications_back">Volver</string>
+    <string name="notifications_mark_read">Marcar leídas</string>
 </resources>

@@ -1,14 +1,18 @@
 package com.logix.optiflow.di
 
 import android.content.Context
+import com.logix.optiflow.data.local.NotificationReadStore
 import com.logix.optiflow.data.local.PatientSessionStore
+import com.logix.optiflow.data.repository.NotificationRepositoryImpl
 import com.logix.optiflow.data.remote.ApiClient
 import com.logix.optiflow.data.repository.AppointmentRepositoryImpl
 import com.logix.optiflow.data.repository.OpticalStoreRepositoryImpl
 import com.logix.optiflow.data.repository.PatientRepositoryImpl
 import com.logix.optiflow.domain.repository.AppointmentRepository
 import com.logix.optiflow.domain.repository.OpticalStoreRepository
+import com.logix.optiflow.domain.repository.NotificationRepository
 import com.logix.optiflow.domain.repository.PatientRepository
+import com.logix.optiflow.domain.usecase.GetNotificationsUseCase
 import com.logix.optiflow.domain.usecase.BookAppointmentUseCase
 import com.logix.optiflow.domain.usecase.GetOpticalStoresUseCase
 import com.logix.optiflow.domain.usecase.SearchOpticalStoresUseCase
@@ -87,5 +91,20 @@ object SearchBookingModule {
 
     val getPatientAppointmentsUseCase: GetPatientAppointmentsUseCase by lazy {
         GetPatientAppointmentsUseCase(appointmentRepository)
+    }
+
+    private val notificationReadStore: NotificationReadStore by lazy {
+        NotificationReadStore(requireContext())
+    }
+
+    val notificationRepository: NotificationRepository by lazy {
+        NotificationRepositoryImpl(
+            api = ApiClient.searchBookingApi,
+            readStore = notificationReadStore,
+        )
+    }
+
+    val getNotificationsUseCase: GetNotificationsUseCase by lazy {
+        GetNotificationsUseCase(notificationRepository)
     }
 }
