@@ -8,11 +8,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.logix.optiflow.ui.auth.AuthScreen
 import com.logix.optiflow.ui.booking.BookingScreen
+import com.logix.optiflow.ui.main.MainShell
 import com.logix.optiflow.ui.search.StoreSearchScreen
 import java.util.UUID
 
 object Routes {
     const val WELCOME = "welcome"
+    const val MAIN = "main"
     const val SEARCH = "search"
     const val AUTH = "auth"
     const val BOOKING = "booking/{storeId}"
@@ -29,8 +31,18 @@ fun OptiFlowNavHost() {
             AuthScreen(
                 onBack = null,
                 onAuthenticated = {
-                    navController.navigate(Routes.SEARCH) {
+                    navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.WELCOME) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable(Routes.MAIN) {
+            MainShell(
+                rootNavController = navController,
+                onLogout = {
+                    navController.navigate(Routes.WELCOME) {
+                        popUpTo(Routes.MAIN) { inclusive = true }
                     }
                 },
             )
@@ -59,7 +71,7 @@ fun OptiFlowNavHost() {
                 onBack = { navController.popBackStack() },
                 onNeedAuth = { navController.navigate(Routes.AUTH) },
                 onConfirmed = {
-                    navController.popBackStack(Routes.SEARCH, inclusive = false)
+                    navController.popBackStack(Routes.MAIN, inclusive = false)
                 },
             )
         }

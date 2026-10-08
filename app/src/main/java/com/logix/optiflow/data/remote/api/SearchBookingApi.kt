@@ -1,6 +1,7 @@
 package com.logix.optiflow.data.remote.api
 
 import com.logix.optiflow.data.remote.dto.AppointmentDto
+import com.logix.optiflow.data.remote.dto.AppointmentListResponse
 import com.logix.optiflow.data.remote.dto.BookAppointmentRequest
 import com.logix.optiflow.data.remote.dto.LoginRequest
 import com.logix.optiflow.data.remote.dto.LoginResponse

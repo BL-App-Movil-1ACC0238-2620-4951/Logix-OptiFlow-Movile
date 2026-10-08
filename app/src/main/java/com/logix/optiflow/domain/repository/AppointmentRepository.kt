@@ -11,4 +11,6 @@ interface AppointmentRepository {
         opticalStoreId: UUID,
         timeSlotId: UUID,
     ): Appointment
+
+    suspend fun getPatientAppointments(patientId: UUID): List<Appointment>
 }
