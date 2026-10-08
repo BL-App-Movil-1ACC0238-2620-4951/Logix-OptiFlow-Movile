@@ -47,6 +47,6 @@ class AppointmentRepositoryImpl(
 
     override suspend fun getPatientAppointments(patientId: UUID): List<Appointment> =
         withContext(Dispatchers.IO) {
-            api.getPatientAppointments(patientId).value.orEmpty().map { it.toDomain() }
+            api.getPatientAppointments(patientId).map { it.toDomain() }
         }
 }
